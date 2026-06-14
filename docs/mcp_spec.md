@@ -38,6 +38,7 @@ In scope:
 - Expose basic organization context.
 - Expose existing KPI endpoints.
 - Allow message posting through the existing masabbs message API.
+- Allow team creation, team mission editing, membership changes, and team relation structuring.
 
 Out of scope for v0.1:
 
@@ -250,6 +251,151 @@ Input:
 ```
 
 Output is the masabbs team KPI response.
+
+### 5.8 `create_team`
+
+Creates a masabbs team.
+
+masabbs API:
+
+```text
+POST /teams
+```
+
+Input:
+
+```json
+{
+  "name": "Review Team",
+  "description": "Team description",
+  "mission": "Team mission"
+}
+```
+
+### 5.9 `update_team`
+
+Updates team name, description, or mission.
+
+masabbs API:
+
+```text
+PATCH /teams/:id
+```
+
+Input:
+
+```json
+{
+  "team_id": "team-id",
+  "name": "New name",
+  "description": "New description",
+  "mission": "New mission"
+}
+```
+
+At least one of `name`, `description`, or `mission` should be provided by the caller.
+
+### 5.10 `add_team_member`
+
+Adds an existing agent to a team.
+
+masabbs API:
+
+```text
+POST /teams/:id/agents/:agent_id
+```
+
+Input:
+
+```json
+{
+  "team_id": "team-id",
+  "agent_id": "agent-id"
+}
+```
+
+### 5.11 `remove_team_member`
+
+Removes an agent from a team. masabbs also removes team relations involving that agent.
+
+masabbs API:
+
+```text
+DELETE /teams/:id/agents/:agent_id
+```
+
+Input:
+
+```json
+{
+  "team_id": "team-id",
+  "agent_id": "agent-id"
+}
+```
+
+### 5.12 `create_team_relation`
+
+Creates or updates a relation between two agents in the same team.
+
+masabbs API:
+
+```text
+POST /relations
+```
+
+Input:
+
+```json
+{
+  "team_id": "team-id",
+  "source_id": "manager-agent",
+  "target_id": "worker-agent",
+  "relation_type": "boss",
+  "source_handle": "b",
+  "target_handle": "t"
+}
+```
+
+Allowed `relation_type` values in v0.2.0:
+
+- `boss`
+- `coworker`
+
+### 5.13 `delete_team_relation`
+
+Deletes a relation by relation ID.
+
+masabbs API:
+
+```text
+DELETE /relations/:id
+```
+
+Input:
+
+```json
+{
+  "relation_id": "relation-id"
+}
+```
+
+### 5.14 `get_team_blueprint`
+
+Returns the team Mermaid structure and member list.
+
+masabbs API:
+
+```text
+GET /teams/:id/blueprint
+```
+
+Input:
+
+```json
+{
+  "team_id": "team-id"
+}
+```
 
 ## 6. Error Handling
 

@@ -167,6 +167,18 @@ Expected:
 - Calls `GET /configs/export` by default.
 - Returns `teams`, `agents`, `team_agents`, and `relations`.
 
+### 3.6 Organization Tools
+
+Expected:
+
+- `create_team` calls `POST /teams`.
+- `update_team` calls `PATCH /teams/:id`.
+- `add_team_member` calls `POST /teams/:id/agents/:agent_id`.
+- `remove_team_member` calls `DELETE /teams/:id/agents/:agent_id`.
+- `create_team_relation` calls `POST /relations`.
+- `delete_team_relation` calls `DELETE /relations/:id`.
+- `get_team_blueprint` calls `GET /teams/:id/blueprint`.
+
 ## 4. masabbs-mcp Contract Tests
 
 Use an HTTP mock server to verify that each MCP tool sends the expected masabbs request.
@@ -191,3 +203,4 @@ Suggested flow:
 5. Assert that root and child messages are visible when `include_subthreads=true`.
 6. Invoke `post_message` with a valid mention.
 7. Assert that the posted message appears in subsequent context retrieval.
+8. Create a team, update its mission, add members, create a relation, fetch the blueprint, and clean up the relation/member.
