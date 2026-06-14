@@ -1,0 +1,37 @@
+{
+  "name": "masabbs-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for reviewing masabbs discussions and organization context through LLM clients.",
+  "license": "MIT",
+  "author": "TatsuyaKatayama",
+  "type": "module",
+  "bin": {
+    "masabbs-mcp": "./dist/server.js"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx src/server.ts",
+    "test": "vitest run",
+    "test:integration": "RUN_IT=1 vitest run test/integration",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.13.0",
+    "zod": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0",
+    "vitest": "^4.1.8"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
