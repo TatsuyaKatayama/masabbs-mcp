@@ -43,6 +43,48 @@ describeIntegration("masabbs integration", () => {
       message_stats: expect.any(Object)
     });
   });
+
+  it("configures team organization through the MCP client layer", async () => {
+    const team = (await client.createTeam({
+      name: `IT Review Team ${Date.now()}`,
+      description: "integration test team",
+      mission: "initial mission"
+    })) as { id: string; name: string; mission: string };
+
+    expect(team.id).toEqual(expect.any(String));
+
+    await expect(
+      client.updateTeam({
+        teamId: team.id,
+        mission: "review masabbs discussions and improve organization design"
+      })
+    ).resolves.toMatchObject({ message: expect.any(String) });
+
+    await expect(client.addTeamMember({ teamId: team.id, agentId: "admin-ui" })).resolves.toMatchObject({
+      message: expect.any(String)
+    });
+    await expect(client.addTeamMember({ teamId: team.id, agentId: "gemini-agent" })).resolves.toMatchObject({
+      message: expect.any(String)
+    });
+
+    const relation = (await client.createTeamRelation({
+      teamId: team.id,
+      sourceId: "admin-ui",
+      targetId: "gemini-agent",
+      relationType: "boss"
+    })) as { id: string };
+
+    expect(relation.id).toEqual(expect.any(String));
+
+    await expect(client.getTeamBlueprint(team.id)).resolves.toMatchObject({
+      team_id: team.id,
+      members: expect.any(Array),
+      structure_mermaid: expect.stringContaining("graph TD")
+    });
+
+    await expect(client.deleteTeamRelation(relation.id)).resolves.toEqual({});
+    await expect(client.removeTeamMember({ teamId: team.id, agentId: "gemini-agent" })).resolves.toEqual({});
+  });
 });
 
 async function createThread(): Promise<{ thread_id: string; input_dir: string }> {

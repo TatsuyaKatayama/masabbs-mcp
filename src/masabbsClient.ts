@@ -121,6 +121,61 @@ export class MasabbsClient {
     return this.request("GET", `/teams/${encodeURIComponent(teamId)}/kpi`);
   }
 
+  async createTeam(input: { name: string; description?: string; mission?: string }): Promise<unknown> {
+    return this.request("POST", "/teams", {
+      name: input.name,
+      description: input.description,
+      mission: input.mission
+    });
+  }
+
+  async updateTeam(input: {
+    teamId: string;
+    name?: string;
+    description?: string;
+    mission?: string;
+  }): Promise<unknown> {
+    return this.request("PATCH", `/teams/${encodeURIComponent(input.teamId)}`, {
+      name: input.name,
+      description: input.description,
+      mission: input.mission
+    });
+  }
+
+  async addTeamMember(input: { teamId: string; agentId: string }): Promise<unknown> {
+    return this.request("POST", `/teams/${encodeURIComponent(input.teamId)}/agents/${encodeURIComponent(input.agentId)}`);
+  }
+
+  async removeTeamMember(input: { teamId: string; agentId: string }): Promise<unknown> {
+    return this.request("DELETE", `/teams/${encodeURIComponent(input.teamId)}/agents/${encodeURIComponent(input.agentId)}`);
+  }
+
+  async createTeamRelation(input: {
+    teamId: string;
+    sourceId: string;
+    targetId: string;
+    relationType: "boss" | "coworker";
+    sourceHandle?: string;
+    targetHandle?: string;
+  }): Promise<unknown> {
+    return this.request("POST", "/relations", {
+      team_id: input.teamId,
+      source_id: input.sourceId,
+      target_id: input.targetId,
+      relation_type: input.relationType,
+      source_handle: input.sourceHandle,
+      target_handle: input.targetHandle
+    });
+  }
+
+  async deleteTeamRelation(relationId: string): Promise<unknown> {
+    return this.request("DELETE", `/relations/${encodeURIComponent(relationId)}`);
+  }
+
+  async getTeamBlueprint(teamId: string): Promise<unknown> {
+    return this.request("GET", `/teams/${encodeURIComponent(teamId)}/blueprint`);
+  }
+
   private async request<T = unknown>(method: string, path: string, body?: unknown): Promise<T> {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), this.timeoutMs);

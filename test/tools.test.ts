@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MasabbsError } from "../src/masabbsClient.js";
-import { errorResult, okResult } from "../src/tools.js";
+import { createToolHandlers, errorResult, okResult } from "../src/tools.js";
 
 describe("tool results", () => {
   it("returns structured content for successful calls", () => {
@@ -27,5 +27,49 @@ describe("tool results", () => {
       status: 404,
       source: "masabbs"
     });
+  });
+});
+
+describe("organization tool handlers", () => {
+  it("maps team tool input to client calls", async () => {
+    const calls: unknown[] = [];
+    const handlers = createToolHandlers({
+      createTeam: async (input: unknown) => {
+        calls.push(input);
+        return { id: "team-1" };
+      }
+    } as never);
+
+    const result = await handlers.createTeam({ name: "Team", mission: "Mission" });
+
+    expect(calls).toEqual([{ name: "Team", mission: "Mission" }]);
+    expect(result.structuredContent).toEqual({ id: "team-1" });
+  });
+
+  it("maps relation tool input to client calls", async () => {
+    const calls: unknown[] = [];
+    const handlers = createToolHandlers({
+      createTeamRelation: async (input: unknown) => {
+        calls.push(input);
+        return { id: "relation-1" };
+      }
+    } as never);
+
+    const result = await handlers.createTeamRelation({
+      team_id: "team-1",
+      source_id: "admin-ui",
+      target_id: "gemini-agent",
+      relation_type: "boss"
+    });
+
+    expect(calls).toEqual([
+      {
+        teamId: "team-1",
+        sourceId: "admin-ui",
+        targetId: "gemini-agent",
+        relationType: "boss"
+      }
+    ]);
+    expect(result.structuredContent).toEqual({ id: "relation-1" });
   });
 });

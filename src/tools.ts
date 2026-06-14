@@ -52,7 +52,56 @@ export function createToolHandlers(client: MasabbsClient) {
       okResult(await client.getThreadKpi(input.thread_id)),
 
     getTeamKpi: async (input: { team_id: string }): Promise<CallToolResult> =>
-      okResult(await client.getTeamKpi(input.team_id))
+      okResult(await client.getTeamKpi(input.team_id)),
+
+    createTeam: async (input: { name: string; description?: string; mission?: string }): Promise<CallToolResult> =>
+      okResult(await client.createTeam(input)),
+
+    updateTeam: async (input: {
+      team_id: string;
+      name?: string;
+      description?: string;
+      mission?: string;
+    }): Promise<CallToolResult> =>
+      okResult(
+        await client.updateTeam({
+          teamId: input.team_id,
+          name: input.name,
+          description: input.description,
+          mission: input.mission
+        })
+      ),
+
+    addTeamMember: async (input: { team_id: string; agent_id: string }): Promise<CallToolResult> =>
+      okResult(await client.addTeamMember({ teamId: input.team_id, agentId: input.agent_id })),
+
+    removeTeamMember: async (input: { team_id: string; agent_id: string }): Promise<CallToolResult> =>
+      okResult(await client.removeTeamMember({ teamId: input.team_id, agentId: input.agent_id })),
+
+    createTeamRelation: async (input: {
+      team_id: string;
+      source_id: string;
+      target_id: string;
+      relation_type: "boss" | "coworker";
+      source_handle?: string;
+      target_handle?: string;
+    }): Promise<CallToolResult> =>
+      okResult(
+        await client.createTeamRelation({
+          teamId: input.team_id,
+          sourceId: input.source_id,
+          targetId: input.target_id,
+          relationType: input.relation_type,
+          sourceHandle: input.source_handle,
+          targetHandle: input.target_handle
+        })
+      ),
+
+    deleteTeamRelation: async (input: { relation_id: string }): Promise<CallToolResult> =>
+      okResult(await client.deleteTeamRelation(input.relation_id)),
+
+    getTeamBlueprint: async (input: { team_id: string }): Promise<CallToolResult> =>
+      okResult(await client.getTeamBlueprint(input.team_id))
   };
 }
 

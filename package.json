@@ -1,6 +1,6 @@
 {
   "name": "masabbs-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for reviewing masabbs discussions and organization context through LLM clients.",
   "license": "MIT",
   "author": "TatsuyaKatayama",
