@@ -1,0 +1,79 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      masabbs_ref:
+        description: "masabbs commit, tag, or branch used for integration tests"
+        required: true
+        default: "8faf686cbff11d9f8e0a74428ca6da03fe60ff75"
+
+env:
+  MASABBS_REF: ${{ github.event.inputs.masabbs_ref || '8faf686cbff11d9f8e0a74428ca6da03fe60ff75' }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout masabbs-mcp
+        uses: actions/checkout@v4
+        with:
+          path: masabbs-mcp
+
+      - name: Checkout masabbs
+        uses: actions/checkout@v4
+        with:
+          repository: TatsuyaKatayama/masabbs
+          ref: ${{ env.MASABBS_REF }}
+          path: masabbs
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: masabbs-mcp/package-lock.json
+
+      - name: Install dependencies
+        working-directory: masabbs-mcp
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: masabbs-mcp
+        run: npm run typecheck
+
+      - name: Unit tests
+        working-directory: masabbs-mcp
+        run: npm test
+
+      - name: Build
+        working-directory: masabbs-mcp
+        run: npm run build
+
+      - name: Start masabbs
+        working-directory: masabbs
+        run: docker compose -f docker-compose.yml -f ../masabbs-mcp/.github/compose.masabbs-it.yml up -d --build db nats minio server
+
+      - name: Wait for masabbs API
+        run: |
+          for i in {1..60}; do
+            if curl -fsS http://localhost:8080/api/v1/health; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -f masabbs/docker-compose.yml -f masabbs-mcp/.github/compose.masabbs-it.yml logs server
+          exit 1
+
+      - name: Integration tests
+        working-directory: masabbs-mcp
+        env:
+          MASABBS_BASE_URL: http://localhost:8080/api/v1
+        run: npm run test:integration
+
+      - name: Stop masabbs
+        if: always()
+        working-directory: masabbs
+        run: docker compose -f docker-compose.yml -f ../masabbs-mcp/.github/compose.masabbs-it.yml down -v
