@@ -9,7 +9,7 @@ import { createToolHandlers, errorResult } from "./tools.js";
 export function createServer(client: MasabbsClient): McpServer {
   const server = new McpServer({
     name: "masabbs-mcp",
-    version: "0.1.0"
+    version: "0.2.0"
   });
   const tools = createToolHandlers(client);
 
@@ -97,6 +97,102 @@ export function createServer(client: MasabbsClient): McpServer {
       }
     },
     async (input) => withErrorHandling(() => tools.getTeamKpi(input))
+  );
+
+  server.registerTool(
+    "create_team",
+    {
+      title: "Create Team",
+      description: "Create a masabbs team with optional description and mission.",
+      inputSchema: {
+        name: z.string().min(1),
+        description: z.string().optional(),
+        mission: z.string().optional()
+      }
+    },
+    async (input) => withErrorHandling(() => tools.createTeam(input))
+  );
+
+  server.registerTool(
+    "update_team",
+    {
+      title: "Update Team",
+      description: "Update a masabbs team name, description, or mission.",
+      inputSchema: {
+        team_id: z.string().min(1),
+        name: z.string().optional(),
+        description: z.string().optional(),
+        mission: z.string().optional()
+      }
+    },
+    async (input) => withErrorHandling(() => tools.updateTeam(input))
+  );
+
+  server.registerTool(
+    "add_team_member",
+    {
+      title: "Add Team Member",
+      description: "Add an existing agent to a team.",
+      inputSchema: {
+        team_id: z.string().min(1),
+        agent_id: z.string().min(1)
+      }
+    },
+    async (input) => withErrorHandling(() => tools.addTeamMember(input))
+  );
+
+  server.registerTool(
+    "remove_team_member",
+    {
+      title: "Remove Team Member",
+      description: "Remove an agent from a team. masabbs also removes team relations involving that agent.",
+      inputSchema: {
+        team_id: z.string().min(1),
+        agent_id: z.string().min(1)
+      }
+    },
+    async (input) => withErrorHandling(() => tools.removeTeamMember(input))
+  );
+
+  server.registerTool(
+    "create_team_relation",
+    {
+      title: "Create Team Relation",
+      description: "Create or update a team relation between two agents. relation_type must be boss or coworker.",
+      inputSchema: {
+        team_id: z.string().min(1),
+        source_id: z.string().min(1),
+        target_id: z.string().min(1),
+        relation_type: z.enum(["boss", "coworker"]),
+        source_handle: z.string().optional(),
+        target_handle: z.string().optional()
+      }
+    },
+    async (input) => withErrorHandling(() => tools.createTeamRelation(input))
+  );
+
+  server.registerTool(
+    "delete_team_relation",
+    {
+      title: "Delete Team Relation",
+      description: "Delete a team relation by relation ID.",
+      inputSchema: {
+        relation_id: z.string().min(1)
+      }
+    },
+    async (input) => withErrorHandling(() => tools.deleteTeamRelation(input))
+  );
+
+  server.registerTool(
+    "get_team_blueprint",
+    {
+      title: "Get Team Blueprint",
+      description: "Return the Mermaid structure and members for a team.",
+      inputSchema: {
+        team_id: z.string().min(1)
+      }
+    },
+    async (input) => withErrorHandling(() => tools.getTeamBlueprint(input))
   );
 
   return server;

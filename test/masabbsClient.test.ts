@@ -47,6 +47,97 @@ describe("MasabbsClient", () => {
     );
   });
 
+  it("creates and updates teams", async () => {
+    const fetchImpl = jsonFetch({ status: 200, body: { message: "ok" } });
+    const client = new MasabbsClient({ baseUrl: "http://localhost/api/v1", timeoutMs: 1000, fetchImpl });
+
+    await client.createTeam({ name: "Review Team", description: "desc", mission: "mission" });
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost/api/v1/teams",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ name: "Review Team", description: "desc", mission: "mission" })
+      })
+    );
+
+    await client.updateTeam({ teamId: "team-1", mission: "new mission" });
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost/api/v1/teams/team-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ mission: "new mission" })
+      })
+    );
+  });
+
+  it("adds and removes team members", async () => {
+    const fetchImpl = jsonFetch({ status: 200, body: { message: "ok" } });
+    const client = new MasabbsClient({ baseUrl: "http://localhost/api/v1", timeoutMs: 1000, fetchImpl });
+
+    await client.addTeamMember({ teamId: "team-1", agentId: "agent-1" });
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost/api/v1/teams/team-1/agents/agent-1",
+      expect.objectContaining({ method: "POST" })
+    );
+
+    await client.removeTeamMember({ teamId: "team-1", agentId: "agent-1" });
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost/api/v1/teams/team-1/agents/agent-1",
+      expect.objectContaining({ method: "DELETE" })
+    );
+  });
+
+  it("creates and deletes team relations", async () => {
+    const fetchImpl = jsonFetch({ status: 200, body: { id: "relation-1" } });
+    const client = new MasabbsClient({ baseUrl: "http://localhost/api/v1", timeoutMs: 1000, fetchImpl });
+
+    await client.createTeamRelation({
+      teamId: "team-1",
+      sourceId: "manager",
+      targetId: "worker",
+      relationType: "boss",
+      sourceHandle: "b",
+      targetHandle: "t"
+    });
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost/api/v1/relations",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          team_id: "team-1",
+          source_id: "manager",
+          target_id: "worker",
+          relation_type: "boss",
+          source_handle: "b",
+          target_handle: "t"
+        })
+      })
+    );
+
+    await client.deleteTeamRelation("relation-1");
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost/api/v1/relations/relation-1",
+      expect.objectContaining({ method: "DELETE" })
+    );
+  });
+
+  it("gets team blueprint", async () => {
+    const fetchImpl = jsonFetch({ status: 200, body: { team_id: "team-1", members: [], structure_mermaid: "graph TD\n" } });
+    const client = new MasabbsClient({ baseUrl: "http://localhost/api/v1", timeoutMs: 1000, fetchImpl });
+
+    await client.getTeamBlueprint("team-1");
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "http://localhost/api/v1/teams/team-1/blueprint",
+      expect.objectContaining({ method: "GET" })
+    );
+  });
+
   it("preserves masabbs error codes", async () => {
     const fetchImpl = jsonFetch({ status: 400, body: { error: "NO_RECIPIENT" } });
     const client = new MasabbsClient({ baseUrl: "http://localhost/api/v1", timeoutMs: 1000, fetchImpl });
@@ -91,7 +182,7 @@ describe("MasabbsClient", () => {
 });
 
 function jsonFetch(params: { status: number; body: unknown }): ReturnType<typeof vi.fn<FetchLike>> {
-  return vi.fn<FetchLike>().mockResolvedValue(
+  return vi.fn<FetchLike>().mockImplementation(async () =>
     new Response(JSON.stringify(params.body), {
       status: params.status,
       headers: { "content-type": "application/json" }

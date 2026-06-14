@@ -6,7 +6,7 @@ This project is intended to provide an LLM-facing operation layer over the masab
 
 ## Status
 
-v0.1.0 implements a stdio MCP server that connects to masabbs over HTTP REST.
+v0.2.0 implements a stdio MCP server that connects to masabbs over HTTP REST.
 
 ## Requirements
 
@@ -41,6 +41,13 @@ MASABBS_BASE_URL=http://localhost/api/v1 node dist/server.js
 - `post_message`
 - `get_thread_kpi`
 - `get_team_kpi`
+- `create_team`
+- `update_team`
+- `add_team_member`
+- `remove_team_member`
+- `create_team_relation`
+- `delete_team_relation`
+- `get_team_blueprint`
 
 `get_thread_context` depends on the masabbs endpoint defined in [Thread Context REST API Specification](docs/thread_context_api.md):
 
