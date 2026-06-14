@@ -13,6 +13,19 @@ v0.2.0 implements a stdio MCP server that connects to masabbs over HTTP REST.
 - Node.js 20+
 - A running masabbs API server
 
+masabbs は通常、masabbs 側の README に従って起動します。
+
+```bash
+cd ../masabbs
+docker compose up -d
+```
+
+この起動方法では、masabbs API は nginx proxy 経由で以下になります。
+
+```text
+http://localhost/api/v1
+```
+
 ## Setup
 
 ```bash
@@ -30,6 +43,101 @@ After build:
 ```bash
 npm run build
 MASABBS_BASE_URL=http://localhost/api/v1 node dist/server.js
+```
+
+## MCP Client Settings
+
+使用するCLIツールに応じて、MCP設定ファイルに `masabbs-mcp` を登録します。
+
+### Gemini CLI (`settings.json`)
+
+ホストマシンで直接実行する場合:
+
+```json
+{
+  "mcpServers": {
+    "masabbs-mcp": {
+      "command": "npm",
+      "args": ["run", "--prefix", "/path/to/masabbs-mcp", "dev"],
+      "env": {
+        "MASABBS_BASE_URL": "http://localhost/api/v1",
+        "MASABBS_TIMEOUT_MS": "10000"
+      }
+    }
+  }
+}
+```
+
+ビルド済みの `dist/server.js` を使う場合:
+
+```json
+{
+  "mcpServers": {
+    "masabbs-mcp": {
+      "command": "node",
+      "args": ["/path/to/masabbs-mcp/dist/server.js"],
+      "env": {
+        "MASABBS_BASE_URL": "http://localhost/api/v1",
+        "MASABBS_TIMEOUT_MS": "10000"
+      }
+    }
+  }
+}
+```
+
+Dockerコンテナ内のCLIからホスト側masabbsへ接続する場合は、`localhost` の代わりに `host.docker.internal` を使います。
+
+```json
+{
+  "mcpServers": {
+    "masabbs-mcp": {
+      "command": "node",
+      "args": ["/path/to/masabbs-mcp/dist/server.js"],
+      "env": {
+        "MASABBS_BASE_URL": "http://host.docker.internal/api/v1",
+        "MASABBS_TIMEOUT_MS": "10000"
+      }
+    }
+  }
+}
+```
+
+### Codex CLI (`config.toml`)
+
+ホストマシンで直接実行する場合:
+
+```toml
+[mcp_servers.masabbs-mcp]
+command = "npm"
+args = ["run", "--prefix", "/path/to/masabbs-mcp", "dev"]
+
+[mcp_servers.masabbs-mcp.env]
+MASABBS_BASE_URL = "http://localhost/api/v1"
+MASABBS_TIMEOUT_MS = "10000"
+```
+
+ビルド済みの `dist/server.js` を使う場合:
+
+```toml
+[mcp_servers.masabbs-mcp]
+command = "node"
+args = ["/path/to/masabbs-mcp/dist/server.js"]
+
+[mcp_servers.masabbs-mcp.env]
+MASABBS_BASE_URL = "http://localhost/api/v1"
+MASABBS_TIMEOUT_MS = "10000"
+```
+
+Dockerコンテナ内のCLIからホスト側masabbsへ接続する場合:
+
+```toml
+[mcp_servers.masabbs-mcp]
+command = "node"
+args = ["/path/to/masabbs-mcp/dist/server.js"]
+
+[mcp_servers.masabbs-mcp.env]
+MASABBS_BASE_URL = "http://host.docker.internal/api/v1"
+MASABBS_TIMEOUT_MS = "10000"
 ```
 
 ## MCP Tools
@@ -77,6 +185,8 @@ Integration tests require a running masabbs API:
 ```bash
 MASABBS_BASE_URL=http://localhost:8080/api/v1 npm run test:integration
 ```
+
+Integration tests use a lightweight Docker Compose override that exposes the masabbs API server directly on port `8080`. This is only for tests. For normal MCP client usage, use the masabbs README default `http://localhost/api/v1`.
 
 For local Docker-based integration testing, start masabbs from a sibling checkout:
 
