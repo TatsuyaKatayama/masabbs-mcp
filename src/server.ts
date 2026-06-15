@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+import { realpathSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod/v3";
@@ -216,9 +218,32 @@ async function main() {
   });
   const server = createServer(client);
   await server.connect(new StdioServerTransport());
+  await keepProcessAlive();
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+function isEntrypoint() {
+  if (!process.argv[1]) {
+    return true;
+  }
+  const modulePath = realpathSync(fileURLToPath(import.meta.url));
+  const argvPath = realpathSync(process.argv[1]);
+  return modulePath === argvPath;
+}
+
+function keepProcessAlive() {
+  process.stdin.resume();
+  return new Promise<void>((resolve) => {
+    const interval = setInterval(() => undefined, 2 ** 31 - 1);
+    const shutdown = () => {
+      clearInterval(interval);
+      resolve();
+    };
+    process.once("SIGINT", shutdown);
+    process.once("SIGTERM", shutdown);
+  });
+}
+
+if (isEntrypoint()) {
   main().catch((error) => {
     console.error(error);
     process.exit(1);
