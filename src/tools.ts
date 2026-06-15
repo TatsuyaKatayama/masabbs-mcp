@@ -33,6 +33,8 @@ export function createToolHandlers(client: MasabbsClient) {
       thread_id: string;
       from_agent: string;
       message: string;
+      to?: string[];
+      observers?: string[];
       output_dir?: string;
       error?: string;
       metadata?: Record<string, unknown>;
@@ -42,6 +44,8 @@ export function createToolHandlers(client: MasabbsClient) {
           threadId: input.thread_id,
           fromAgent: input.from_agent,
           message: input.message,
+          to: input.to,
+          observers: input.observers,
           outputDir: input.output_dir,
           error: input.error,
           metadata: input.metadata

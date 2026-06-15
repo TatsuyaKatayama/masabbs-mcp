@@ -67,6 +67,8 @@ export function createServer(client: MasabbsClient): McpServer {
         thread_id: z.string().min(1),
         from_agent: z.string().min(1),
         message: z.string().min(1),
+        to: z.array(z.string().min(1)).optional(),
+        observers: z.array(z.string().min(1)).optional(),
         output_dir: z.string().optional(),
         error: z.string().optional(),
         metadata: z.record(z.unknown()).optional()

@@ -34,7 +34,9 @@ describe("MasabbsClient", () => {
     await client.postMessage({
       threadId: "thread-1",
       fromAgent: "agent-1",
-      message: "hello @agent-2"
+      message: "hello",
+      to: ["agent-2"],
+      observers: ["observer-1"]
     });
 
     expect(fetchImpl).toHaveBeenCalledWith(
@@ -42,7 +44,12 @@ describe("MasabbsClient", () => {
       expect.objectContaining({
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ from_agent: "agent-1", message: "hello @agent-2" })
+        body: JSON.stringify({
+          from_agent: "agent-1",
+          message: "hello",
+          to: ["agent-2"],
+          observers: ["observer-1"]
+        })
       })
     );
   });

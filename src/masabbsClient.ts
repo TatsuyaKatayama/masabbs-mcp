@@ -100,6 +100,8 @@ export class MasabbsClient {
     threadId: string;
     fromAgent: string;
     message: string;
+    to?: string[];
+    observers?: string[];
     outputDir?: string;
     error?: string;
     metadata?: Record<string, unknown>;
@@ -107,6 +109,8 @@ export class MasabbsClient {
     return this.request("POST", `/threads/${encodeURIComponent(input.threadId)}/messages`, {
       from_agent: input.fromAgent,
       message: input.message,
+      to: input.to,
+      observers: input.observers,
       output_dir: input.outputDir,
       error: input.error,
       metadata: input.metadata
