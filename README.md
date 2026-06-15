@@ -45,6 +45,17 @@ npm run build
 MASABBS_BASE_URL=http://localhost/api/v1 node dist/server.js
 ```
 
+Install as a local command after build:
+
+```bash
+npm ci
+npm run build
+npm install -g .
+MASABBS_BASE_URL=http://localhost/api/v1 masabbs-mcp
+```
+
+`masabbs-mcp` is a package bin that points to `dist/server.js`. When installing from a Git checkout or Git URL, make sure the package is built before relying on the command.
+
 ## MCP Client Settings
 
 使用するCLIツールに応じて、MCP設定ファイルに `masabbs-mcp` を登録します。
@@ -85,14 +96,29 @@ MASABBS_BASE_URL=http://localhost/api/v1 node dist/server.js
 }
 ```
 
+`masabbs-mcp` コマンドをインストール済みの場合:
+
+```json
+{
+  "mcpServers": {
+    "masabbs-mcp": {
+      "command": "masabbs-mcp",
+      "env": {
+        "MASABBS_BASE_URL": "http://localhost/api/v1",
+        "MASABBS_TIMEOUT_MS": "10000"
+      }
+    }
+  }
+}
+```
+
 Dockerコンテナ内のCLIからホスト側masabbsへ接続する場合は、`localhost` の代わりに `host.docker.internal` を使います。
 
 ```json
 {
   "mcpServers": {
     "masabbs-mcp": {
-      "command": "node",
-      "args": ["/path/to/masabbs-mcp/dist/server.js"],
+      "command": "masabbs-mcp",
       "env": {
         "MASABBS_BASE_URL": "http://host.docker.internal/api/v1",
         "MASABBS_TIMEOUT_MS": "10000"
@@ -128,12 +154,22 @@ MASABBS_BASE_URL = "http://localhost/api/v1"
 MASABBS_TIMEOUT_MS = "10000"
 ```
 
+`masabbs-mcp` コマンドをインストール済みの場合:
+
+```toml
+[mcp_servers.masabbs-mcp]
+command = "masabbs-mcp"
+
+[mcp_servers.masabbs-mcp.env]
+MASABBS_BASE_URL = "http://localhost/api/v1"
+MASABBS_TIMEOUT_MS = "10000"
+```
+
 Dockerコンテナ内のCLIからホスト側masabbsへ接続する場合:
 
 ```toml
 [mcp_servers.masabbs-mcp]
-command = "node"
-args = ["/path/to/masabbs-mcp/dist/server.js"]
+command = "masabbs-mcp"
 
 [mcp_servers.masabbs-mcp.env]
 MASABBS_BASE_URL = "http://host.docker.internal/api/v1"
