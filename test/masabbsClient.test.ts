@@ -54,6 +54,69 @@ describe("MasabbsClient", () => {
     );
   });
 
+  it("creates threads with masabbs field names", async () => {
+    const fetchImpl = jsonFetch({ status: 201, body: { thread_id: "thread-1", input_dir: "tasks/thread-1/input" } });
+    const client = new MasabbsClient({ baseUrl: "http://localhost/api/v1", timeoutMs: 1000, fetchImpl });
+
+    await client.createThread({
+      command: "hello @agent-2",
+      createdByAgent: "agent-1",
+      to: ["agent-2"],
+      observers: ["observer-1"],
+      parentThreadId: "parent-1",
+      deadline: "2026-06-17T00:00:00Z",
+      teamId: "team-1"
+    });
+
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "http://localhost/api/v1/threads",
+      expect.objectContaining({
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          command: "hello @agent-2",
+          created_by_agent: "agent-1",
+          to: ["agent-2"],
+          observers: ["observer-1"],
+          parent_thread_id: "parent-1",
+          deadline: "2026-06-17T00:00:00Z",
+          team_id: "team-1"
+        })
+      })
+    );
+  });
+
+  it("creates and updates agents", async () => {
+    const fetchImpl = jsonFetch({ status: 200, body: { message: "ok" } });
+    const client = new MasabbsClient({ baseUrl: "http://localhost/api/v1", timeoutMs: 1000, fetchImpl });
+
+    await client.createAgent({ id: "agent-1", name: "Agent One", role: "Worker", mission: "help" });
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      1,
+      "http://localhost/api/v1/agents",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ id: "agent-1", name: "Agent One", role: "Worker", mission: "help" })
+      })
+    );
+
+    await client.updateAgent({
+      agentId: "agent-1",
+      mission: "new mission",
+      teamId: "team-1",
+      uiPosX: 10,
+      uiPosY: 20
+    });
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      2,
+      "http://localhost/api/v1/agents/agent-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ mission: "new mission", team_id: "team-1", ui_pos_x: 10, ui_pos_y: 20 })
+      })
+    );
+  });
+
   it("creates and updates teams", async () => {
     const fetchImpl = jsonFetch({ status: 200, body: { message: "ok" } });
     const client = new MasabbsClient({ baseUrl: "http://localhost/api/v1", timeoutMs: 1000, fetchImpl });

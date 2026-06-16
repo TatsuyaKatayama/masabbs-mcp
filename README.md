@@ -182,9 +182,12 @@ MASABBS_TIMEOUT_MS = "10000"
 - `get_organization`
 - `get_thread_context`
 - `get_thread_messages`
+- `create_thread`
 - `post_message`
 - `get_thread_kpi`
 - `get_team_kpi`
+- `create_agent`
+- `update_agent`
 - `create_team`
 - `update_team`
 - `add_team_member`

@@ -31,6 +31,58 @@ describe("tool results", () => {
 });
 
 describe("organization tool handlers", () => {
+  it("maps thread tool input to client calls", async () => {
+    const calls: unknown[] = [];
+    const handlers = createToolHandlers({
+      createThread: async (input: unknown) => {
+        calls.push(input);
+        return { thread_id: "thread-1" };
+      }
+    } as never);
+
+    const result = await handlers.createThread({
+      command: "hello",
+      created_by_agent: "admin-ui",
+      to: ["gemini-agent"],
+      team_id: "team-1"
+    });
+
+    expect(calls).toEqual([
+      {
+        command: "hello",
+        createdByAgent: "admin-ui",
+        to: ["gemini-agent"],
+        teamId: "team-1"
+      }
+    ]);
+    expect(result.structuredContent).toEqual({ thread_id: "thread-1" });
+  });
+
+  it("maps agent tool input to client calls", async () => {
+    const calls: unknown[] = [];
+    const handlers = createToolHandlers({
+      updateAgent: async (input: unknown) => {
+        calls.push(input);
+        return { message: "ok" };
+      }
+    } as never);
+
+    const result = await handlers.updateAgent({
+      agent_id: "gemini-agent",
+      mission: "review",
+      ui_pos_x: 100
+    });
+
+    expect(calls).toEqual([
+      {
+        agentId: "gemini-agent",
+        mission: "review",
+        uiPosX: 100
+      }
+    ]);
+    expect(result.structuredContent).toEqual({ message: "ok" });
+  });
+
   it("maps team tool input to client calls", async () => {
     const calls: unknown[] = [];
     const handlers = createToolHandlers({

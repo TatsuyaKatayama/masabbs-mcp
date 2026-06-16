@@ -61,6 +61,25 @@ export function createServer(client: MasabbsClient): McpServer {
   );
 
   server.registerTool(
+    "create_thread",
+    {
+      title: "Create Thread",
+      description: "Create a masabbs thread or post an initial task to an existing thread through the REST API.",
+      inputSchema: {
+        thread_id: z.string().min(1).optional(),
+        command: z.string().min(1),
+        created_by_agent: z.string().min(1),
+        to: z.array(z.string().min(1)).optional(),
+        observers: z.array(z.string().min(1)).optional(),
+        parent_thread_id: z.string().min(1).optional(),
+        deadline: z.string().optional(),
+        team_id: z.string().min(1).optional()
+      }
+    },
+    async (input) => withErrorHandling(() => tools.createThread(input))
+  );
+
+  server.registerTool(
     "post_message",
     {
       title: "Post Message",
@@ -101,6 +120,39 @@ export function createServer(client: MasabbsClient): McpServer {
       }
     },
     async (input) => withErrorHandling(() => tools.getTeamKpi(input))
+  );
+
+  server.registerTool(
+    "create_agent",
+    {
+      title: "Create Agent",
+      description: "Create a masabbs agent with optional mission.",
+      inputSchema: {
+        id: z.string().min(1),
+        name: z.string().min(1),
+        role: z.string().min(1),
+        mission: z.string().optional()
+      }
+    },
+    async (input) => withErrorHandling(() => tools.createAgent(input))
+  );
+
+  server.registerTool(
+    "update_agent",
+    {
+      title: "Update Agent",
+      description: "Update a masabbs agent name, role, mission, team assignment, or UI position.",
+      inputSchema: {
+        agent_id: z.string().min(1),
+        name: z.string().optional(),
+        role: z.string().optional(),
+        mission: z.string().optional(),
+        team_id: z.string().optional(),
+        ui_pos_x: z.number().optional(),
+        ui_pos_y: z.number().optional()
+      }
+    },
+    async (input) => withErrorHandling(() => tools.updateAgent(input))
   );
 
   server.registerTool(

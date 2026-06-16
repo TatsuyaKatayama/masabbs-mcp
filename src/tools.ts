@@ -29,6 +29,29 @@ export function createToolHandlers(client: MasabbsClient) {
     getThreadMessages: async (input: { thread_id: string }): Promise<CallToolResult> =>
       okResult(await client.getThreadMessages(input.thread_id)),
 
+    createThread: async (input: {
+      thread_id?: string;
+      command: string;
+      created_by_agent: string;
+      to?: string[];
+      observers?: string[];
+      parent_thread_id?: string;
+      deadline?: string;
+      team_id?: string;
+    }): Promise<CallToolResult> =>
+      okResult(
+        await client.createThread({
+          threadId: input.thread_id,
+          command: input.command,
+          createdByAgent: input.created_by_agent,
+          to: input.to,
+          observers: input.observers,
+          parentThreadId: input.parent_thread_id,
+          deadline: input.deadline,
+          teamId: input.team_id
+        })
+      ),
+
     postMessage: async (input: {
       thread_id: string;
       from_agent: string;
@@ -57,6 +80,34 @@ export function createToolHandlers(client: MasabbsClient) {
 
     getTeamKpi: async (input: { team_id: string }): Promise<CallToolResult> =>
       okResult(await client.getTeamKpi(input.team_id)),
+
+    createAgent: async (input: {
+      id: string;
+      name: string;
+      role: string;
+      mission?: string;
+    }): Promise<CallToolResult> => okResult(await client.createAgent(input)),
+
+    updateAgent: async (input: {
+      agent_id: string;
+      name?: string;
+      role?: string;
+      mission?: string;
+      team_id?: string;
+      ui_pos_x?: number;
+      ui_pos_y?: number;
+    }): Promise<CallToolResult> =>
+      okResult(
+        await client.updateAgent({
+          agentId: input.agent_id,
+          name: input.name,
+          role: input.role,
+          mission: input.mission,
+          teamId: input.team_id,
+          uiPosX: input.ui_pos_x,
+          uiPosY: input.ui_pos_y
+        })
+      ),
 
     createTeam: async (input: { name: string; description?: string; mission?: string }): Promise<CallToolResult> =>
       okResult(await client.createTeam(input)),

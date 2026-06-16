@@ -96,6 +96,28 @@ export class MasabbsClient {
     };
   }
 
+  async createThread(input: {
+    threadId?: string;
+    command: string;
+    createdByAgent: string;
+    to?: string[];
+    observers?: string[];
+    parentThreadId?: string;
+    deadline?: string;
+    teamId?: string;
+  }): Promise<unknown> {
+    return this.request("POST", "/threads", {
+      thread_id: input.threadId,
+      command: input.command,
+      created_by_agent: input.createdByAgent,
+      to: input.to,
+      observers: input.observers,
+      parent_thread_id: input.parentThreadId,
+      deadline: input.deadline,
+      team_id: input.teamId
+    });
+  }
+
   async postMessage(input: {
     threadId: string;
     fromAgent: string;
@@ -123,6 +145,39 @@ export class MasabbsClient {
 
   async getTeamKpi(teamId: string): Promise<unknown> {
     return this.request("GET", `/teams/${encodeURIComponent(teamId)}/kpi`);
+  }
+
+  async createAgent(input: {
+    id: string;
+    name: string;
+    role: string;
+    mission?: string;
+  }): Promise<unknown> {
+    return this.request("POST", "/agents", {
+      id: input.id,
+      name: input.name,
+      role: input.role,
+      mission: input.mission
+    });
+  }
+
+  async updateAgent(input: {
+    agentId: string;
+    name?: string;
+    role?: string;
+    mission?: string;
+    teamId?: string;
+    uiPosX?: number;
+    uiPosY?: number;
+  }): Promise<unknown> {
+    return this.request("PATCH", `/agents/${encodeURIComponent(input.agentId)}`, {
+      name: input.name,
+      role: input.role,
+      mission: input.mission,
+      team_id: input.teamId,
+      ui_pos_x: input.uiPosX,
+      ui_pos_y: input.uiPosY
+    });
   }
 
   async createTeam(input: { name: string; description?: string; mission?: string }): Promise<unknown> {
